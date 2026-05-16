@@ -1,1 +1,0 @@
-{"root":["./src/core/migrations.ts","./src/core/tasks.ts","./src/core/types.ts","./src/data/LocalStorageTaskRepository.ts","./src/data/TaskRepository.ts","./src/ui/App.tsx","./src/ui/main.tsx","./src/ui/components/Filters.tsx","./src/ui/components/TaskForm.tsx","./src/ui/components/TaskItem.tsx","./src/ui/components/TaskList.tsx","./src/ui/hooks/useTasks.ts"],"version":"5.9.3"}
