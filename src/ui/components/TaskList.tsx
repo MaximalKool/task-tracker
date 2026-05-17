@@ -34,7 +34,7 @@ export function TaskList({
           <TaskItem
             task={node}
             isSubtask={false}
-            hasChildren={node.children.length > 0}
+            subtasks={node.children}
             onToggle={onToggle}
             onRemove={onRemove}
             onEdit={onEdit}
@@ -47,7 +47,7 @@ export function TaskList({
                   <TaskItem
                     task={child}
                     isSubtask
-                    hasChildren={false}
+                    subtasks={[]}
                     onToggle={onToggle}
                     onRemove={onRemove}
                     onEdit={onEdit}

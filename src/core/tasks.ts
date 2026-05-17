@@ -58,6 +58,22 @@ export function daysUntilDue(task: Task, now: number = Date.now()): number | nul
   return Math.round((dueDay.getTime() - startToday.getTime()) / 86_400_000);
 }
 
+// Soonest deadline among incomplete subtasks, in whole-day delta from today.
+// null when no incomplete subtask has a deadline.
+export function soonestSubtaskDays(
+  subtasks: Task[],
+  now: number = Date.now(),
+): number | null {
+  let min: number | null = null;
+  for (const s of subtasks) {
+    if (s.completed) continue;
+    const d = daysUntilDue(s, now);
+    if (d === null) continue;
+    if (min === null || d < min) min = d;
+  }
+  return min;
+}
+
 export type TaskPatch = {
   title?: string;
   category?: string;
