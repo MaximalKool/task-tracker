@@ -31,8 +31,12 @@ jobs:
         with:
           path: dist
 
+  # Pages publishes only from the default branch; the github-pages
+  # environment rejects deploys from other branches. Pushes to the working
+  # branch still run `build` above for validation.
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
