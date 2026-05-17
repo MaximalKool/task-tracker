@@ -21,4 +21,4 @@ export type PersistedState = {
 
 export type TaskNode = Task & { children: TaskNode[] };
 
-export type StatusFilter = 'all' | 'active' | 'completed';
+export type StatusFilter = 'all' | 'active' | 'overdue' | 'completed';

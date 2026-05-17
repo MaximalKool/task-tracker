@@ -105,8 +105,23 @@ export function filterTasks(
   return tasks.filter((t) => {
     if (status === 'active' && t.completed) return false;
     if (status === 'completed' && !t.completed) return false;
+    if (status === 'overdue' && dueStatus(t) !== 'overdue') return false;
     if (category !== null && t.category !== category) return false;
     return true;
+  });
+}
+
+// Active tasks first, ordered by urgency (most overdue → soonest due →
+// no deadline); completed tasks sink to the bottom.
+export function sortTasks(tasks: Task[], now: number = Date.now()): Task[] {
+  const dueKey = (t: Task) => {
+    const d = daysUntilDue(t, now);
+    return d === null ? Infinity : d;
+  };
+  return [...tasks].sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    if (a.completed && b.completed) return 0;
+    return dueKey(a) - dueKey(b);
   });
 }
 

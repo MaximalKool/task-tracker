@@ -9,7 +9,12 @@ type Props = {
   onClearCompleted: () => void;
 };
 
-const STATUSES: StatusFilter[] = ['all', 'active', 'completed'];
+const STATUSES: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'all' },
+  { value: 'active', label: 'active' },
+  { value: 'overdue', label: 'past due' },
+  { value: 'completed', label: 'completed' },
+];
 
 export function Filters({
   status,
@@ -22,13 +27,13 @@ export function Filters({
   return (
     <div className="filters">
       <div className="filters__group" role="group" aria-label="Status filter">
-        {STATUSES.map((s) => (
+        {STATUSES.map(({ value, label }) => (
           <button
-            key={s}
-            className={`chip${status === s ? ' chip--active' : ''}`}
-            onClick={() => onStatusChange(s)}
+            key={value}
+            className={`chip${status === value ? ' chip--active' : ''}`}
+            onClick={() => onStatusChange(value)}
           >
-            {s}
+            {label}
           </button>
         ))}
       </div>
