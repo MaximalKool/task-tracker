@@ -144,7 +144,7 @@ body {
 
 .task {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
   background: var(--surface);
   border: 2px solid var(--border);
@@ -166,10 +166,16 @@ body {
 
 .task__main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
   flex: 1 1 auto;
   cursor: pointer;
+}
+
+.task__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .task__title {
@@ -182,11 +188,18 @@ body {
 }
 
 .task__category {
-  font-size: 0.95rem;
+  align-self: flex-start;
+  font-size: 0.7rem;
   background: #eef2f7;
   color: #5b6472;
-  padding: 0.15rem 0.5rem;
+  padding: 0.1rem 0.45rem;
   border-radius: 999px;
+}
+
+.task__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 .task__due {

@@ -121,7 +121,9 @@ export function TaskItem({
     );
   }
 
-  const label = dueLabel(task);
+  // No deadline indicator once complete, or on a master with subtasks
+  // (the subtasks carry their own deadlines and are always visible).
+  const label = task.completed || hasChildren ? null : dueLabel(task);
   const completedOn =
     task.completed && task.completedAt != null
       ? new Date(task.completedAt).toLocaleDateString()
@@ -143,29 +145,35 @@ export function TaskItem({
             }
             aria-label={`Mark "${task.title}" ${task.completed ? 'incomplete' : 'complete'}`}
           />
-          <span className="task__title">{task.title}</span>
+          <span className="task__text">
+            <span className="task__title">{task.title}</span>
+            {task.category && (
+              <span className="task__category">{task.category}</span>
+            )}
+          </span>
         </label>
         {completedOn && (
           <span className="task__completed">Completed {completedOn}</span>
         )}
         {label && <span className="task__due">{label}</span>}
-        {task.category && <span className="task__category">{task.category}</span>}
-        {!isSubtask && (
+        <div className="task__actions">
+          {!isSubtask && (
+            <button
+              className="task__btn"
+              onClick={() => setAddingSub((v) => !v)}
+              aria-label={`Add subtask to "${task.title}"`}
+            >
+              + Subtask
+            </button>
+          )}
           <button
             className="task__btn"
-            onClick={() => setAddingSub((v) => !v)}
-            aria-label={`Add subtask to "${task.title}"`}
+            onClick={startEdit}
+            aria-label={`Edit "${task.title}"`}
           >
-            + Subtask
+            Edit
           </button>
-        )}
-        <button
-          className="task__btn"
-          onClick={startEdit}
-          aria-label={`Edit "${task.title}"`}
-        >
-          Edit
-        </button>
+        </div>
         <button
           className="task__remove"
           onClick={() => onRemove(task.id)}
