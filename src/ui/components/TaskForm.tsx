@@ -14,6 +14,7 @@ export function TaskForm({ onAdd, categories }: Props) {
     if (!title.trim()) return;
     onAdd(title, category);
     setTitle('');
+    setCategory('');
   }
 
   return (
