@@ -6,6 +6,7 @@ import {
   filterTasks,
   listCategories,
   removeTask,
+  sortTasks,
   toggleComplete,
   updateTask,
   type TaskPatch,
@@ -66,7 +67,7 @@ export function useTasks(repo: TaskRepository) {
 
   const categories = useMemo(() => listCategories(tasks), [tasks]);
   const visibleTasks = useMemo(
-    () => filterTasks(tasks, status, category),
+    () => sortTasks(filterTasks(tasks, status, category)),
     [tasks, status, category],
   );
 
