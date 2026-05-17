@@ -39,9 +39,9 @@ src/
 4. **Composition root is `src/ui/main.tsx`** — the *only* place a concrete repository is
    instantiated/chosen. Swapping backends = change one line here.
 5. **Data model is forward-compatible** — `Task` carries `parentId`, `order`,
-   `dueDate`, `createdAt`, `updatedAt`; persisted state carries `schemaVersion`
-   (currently `2`). Do not remove these. Any change to the persisted shape requires a
-   new entry in `src/core/migrations.ts`.
+   `dueDate`, `completedAt`, `createdAt`, `updatedAt`; persisted state carries
+   `schemaVersion` (currently `3`). Do not remove these. Any change to the persisted
+   shape requires a new entry in `src/core/migrations.ts`.
 6. **Storage is a flat array** keyed on `parentId`; trees are built at render time via
    `buildTree()` in `core/`. Never store nesting structurally.
 
@@ -101,11 +101,14 @@ npm run typecheck  # type-check only
 
 ## Roadmap (Intentionally Deferred — Not v1)
 
-Nested-task UI, backend + multi-user sync, accounts/auth, reminders,
-recurring tasks, drag-to-reorder, search, export/import, dark mode.
+Backend + multi-user sync, accounts/auth, reminders, recurring tasks,
+drag-to-reorder, search, export/import, dark mode.
 
 (Shipped beyond initial v1: per-task due dates with overdue/due/completed
-outline states, and a completed-tasks counter.)
+outline states, deadline countdown, past-due filter, urgency sorting,
+completed counter + per-task completed date, inline editing, and one level
+of nested subtasks — a parent auto-completes when all its subtasks are done
+and subtasks inherit the parent's category.)
 
 The data model and layering already accommodate these — they are deferred for scope,
 not blocked by architecture.

@@ -5,9 +5,12 @@ import { parseDateInput, toDateInputValue } from '../dateInput';
 
 type Props = {
   task: Task;
+  isSubtask: boolean;
+  hasChildren: boolean;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onEdit: (id: string, patch: TaskPatch) => void;
+  onAddSub: (parentId: string, title: string, dueDate: number | null) => void;
 };
 
 function statusClass(task: Task): string {
@@ -27,11 +30,23 @@ function dueLabel(task: Task): string | null {
   return days > 0 ? `${n} ${unit} till deadline` : `${n} ${unit} past due`;
 }
 
-export function TaskItem({ task, onToggle, onRemove, onEdit }: Props) {
+export function TaskItem({
+  task,
+  isSubtask,
+  hasChildren,
+  onToggle,
+  onRemove,
+  onEdit,
+  onAddSub,
+}: Props) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [category, setCategory] = useState(task.category);
   const [due, setDue] = useState(toDateInputValue(task.dueDate));
+
+  const [addingSub, setAddingSub] = useState(false);
+  const [subTitle, setSubTitle] = useState('');
+  const [subDue, setSubDue] = useState('');
 
   function startEdit() {
     setTitle(task.title);
@@ -45,15 +60,24 @@ export function TaskItem({ task, onToggle, onRemove, onEdit }: Props) {
     if (!title.trim()) return;
     onEdit(task.id, {
       title,
-      category,
+      ...(isSubtask ? {} : { category }),
       dueDate: parseDateInput(due),
     });
     setEditing(false);
   }
 
+  function handleAddSub(e: FormEvent) {
+    e.preventDefault();
+    if (!subTitle.trim()) return;
+    onAddSub(task.id, subTitle, parseDateInput(subDue));
+    setSubTitle('');
+    setSubDue('');
+    setAddingSub(false);
+  }
+
   if (editing) {
     return (
-      <li className="task task--editing">
+      <div className="task task--editing">
         <form className="task__edit" onSubmit={handleSave}>
           <input
             className="task__edit-title"
@@ -63,14 +87,16 @@ export function TaskItem({ task, onToggle, onRemove, onEdit }: Props) {
             autoFocus
             aria-label="Edit task title"
           />
-          <input
-            className="task__edit-category"
-            type="text"
-            value={category}
-            placeholder="Category"
-            onChange={(e) => setCategory(e.target.value)}
-            aria-label="Edit task category"
-          />
+          {!isSubtask && (
+            <input
+              className="task__edit-category"
+              type="text"
+              value={category}
+              placeholder="Category"
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label="Edit task category"
+            />
+          )}
           <input
             className="task__edit-due"
             type="date"
@@ -91,39 +117,93 @@ export function TaskItem({ task, onToggle, onRemove, onEdit }: Props) {
             </button>
           </div>
         </form>
-      </li>
+      </div>
     );
   }
 
   const label = dueLabel(task);
+  const completedOn =
+    task.completed && task.completedAt != null
+      ? new Date(task.completedAt).toLocaleDateString()
+      : null;
 
   return (
-    <li className={`task${statusClass(task)}`}>
-      <label className="task__main">
-        <input
-          type="checkbox"
-          checked={task.completed}
-          onChange={() => onToggle(task.id)}
-          aria-label={`Mark "${task.title}" ${task.completed ? 'incomplete' : 'complete'}`}
-        />
-        <span className="task__title">{task.title}</span>
-      </label>
-      {label && <span className="task__due">{label}</span>}
-      {task.category && <span className="task__category">{task.category}</span>}
-      <button
-        className="task__btn"
-        onClick={startEdit}
-        aria-label={`Edit "${task.title}"`}
-      >
-        Edit
-      </button>
-      <button
-        className="task__remove"
-        onClick={() => onRemove(task.id)}
-        aria-label={`Delete "${task.title}"`}
-      >
-        ×
-      </button>
-    </li>
+    <>
+      <div className={`task${statusClass(task)}`}>
+        <label className="task__main">
+          <input
+            type="checkbox"
+            checked={task.completed}
+            disabled={hasChildren}
+            onChange={() => onToggle(task.id)}
+            title={
+              hasChildren
+                ? 'Completed automatically when all subtasks are done'
+                : undefined
+            }
+            aria-label={`Mark "${task.title}" ${task.completed ? 'incomplete' : 'complete'}`}
+          />
+          <span className="task__title">{task.title}</span>
+        </label>
+        {completedOn && (
+          <span className="task__completed">Completed {completedOn}</span>
+        )}
+        {label && <span className="task__due">{label}</span>}
+        {task.category && <span className="task__category">{task.category}</span>}
+        {!isSubtask && (
+          <button
+            className="task__btn"
+            onClick={() => setAddingSub((v) => !v)}
+            aria-label={`Add subtask to "${task.title}"`}
+          >
+            + Subtask
+          </button>
+        )}
+        <button
+          className="task__btn"
+          onClick={startEdit}
+          aria-label={`Edit "${task.title}"`}
+        >
+          Edit
+        </button>
+        <button
+          className="task__remove"
+          onClick={() => onRemove(task.id)}
+          aria-label={`Delete "${task.title}"`}
+        >
+          ×
+        </button>
+      </div>
+      {addingSub && (
+        <form className="subtask-form" onSubmit={handleAddSub}>
+          <input
+            className="subtask-form__title"
+            type="text"
+            placeholder="Subtask"
+            value={subTitle}
+            onChange={(e) => setSubTitle(e.target.value)}
+            autoFocus
+            aria-label="Subtask title"
+          />
+          <input
+            className="subtask-form__due"
+            type="date"
+            value={subDue}
+            onChange={(e) => setSubDue(e.target.value)}
+            aria-label="Subtask due date"
+          />
+          <button type="submit" className="task__btn task__btn--primary">
+            Add
+          </button>
+          <button
+            type="button"
+            className="task__btn"
+            onClick={() => setAddingSub(false)}
+          >
+            Cancel
+          </button>
+        </form>
+      )}
+    </>
   );
 }

@@ -16,9 +16,26 @@ export function createTask(
     parentId,
     order,
     dueDate,
+    completedAt: null,
     createdAt: now,
     updatedAt: now,
   };
+}
+
+function setCompletion(t: Task, completed: boolean): Task {
+  if (t.completed === completed) return t;
+  const now = Date.now();
+  return { ...t, completed, completedAt: completed ? now : null, updatedAt: now };
+}
+
+// A parent's completion is derived from its subtasks: complete iff every
+// subtask is complete. Childless tasks are returned untouched.
+export function reconcileParents(tasks: Task[]): Task[] {
+  return tasks.map((t) => {
+    const children = tasks.filter((c) => c.parentId === t.id);
+    if (children.length === 0) return t;
+    return setCompletion(t, children.every((c) => c.completed));
+  });
 }
 
 // Pure deadline classification. Overdue = the due day has fully passed;
@@ -48,15 +65,22 @@ export type TaskPatch = {
 };
 
 export function updateTask(tasks: Task[], id: string, patch: TaskPatch): Task[] {
+  const now = Date.now();
   return tasks.map((t) => {
-    if (t.id !== id) return t;
-    return {
-      ...t,
-      ...(patch.title !== undefined ? { title: patch.title.trim() } : {}),
-      ...(patch.category !== undefined ? { category: patch.category.trim() } : {}),
-      ...(patch.dueDate !== undefined ? { dueDate: patch.dueDate } : {}),
-      updatedAt: Date.now(),
-    };
+    if (t.id === id) {
+      return {
+        ...t,
+        ...(patch.title !== undefined ? { title: patch.title.trim() } : {}),
+        ...(patch.category !== undefined ? { category: patch.category.trim() } : {}),
+        ...(patch.dueDate !== undefined ? { dueDate: patch.dueDate } : {}),
+        updatedAt: now,
+      };
+    }
+    // Subtasks inherit the master task's category.
+    if (patch.category !== undefined && t.parentId === id) {
+      return { ...t, category: patch.category.trim(), updatedAt: now };
+    }
+    return t;
   });
 }
 
@@ -77,13 +101,16 @@ export function removeTask(tasks: Task[], id: string): Task[] {
       }
     }
   }
-  return tasks.filter((t) => !removed.has(t.id));
+  return reconcileParents(tasks.filter((t) => !removed.has(t.id)));
 }
 
 export function toggleComplete(tasks: Task[], id: string): Task[] {
-  return tasks.map((t) =>
-    t.id === id ? { ...t, completed: !t.completed, updatedAt: Date.now() } : t,
+  // A parent with subtasks is driven by its subtasks, not toggled directly.
+  if (tasks.some((c) => c.parentId === id)) return tasks;
+  const next = tasks.map((t) =>
+    t.id === id ? setCompletion(t, !t.completed) : t,
   );
+  return reconcileParents(next);
 }
 
 export function clearCompleted(tasks: Task[]): Task[] {

@@ -6,11 +6,12 @@ export type Task = {
   parentId: string | null; // null = top-level; enables nested tasks with no migration
   order: number; // stable sort slot; enables future drag-reorder
   dueDate: number | null; // local-midnight timestamp; null = no deadline
+  completedAt: number | null; // timestamp when marked complete; null otherwise
   createdAt: number;
   updatedAt: number; // enables future sync / conflict resolution
 };
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 export type DueStatus = 'overdue' | 'due' | 'none';
 
