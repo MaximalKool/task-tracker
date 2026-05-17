@@ -58,20 +58,44 @@ export function daysUntilDue(task: Task, now: number = Date.now()): number | nul
   return Math.round((dueDay.getTime() - startToday.getTime()) / 86_400_000);
 }
 
+// The incomplete subtask with the soonest deadline, or null when none has one.
+export function soonestSubtask(
+  subtasks: Task[],
+  now: number = Date.now(),
+): Task | null {
+  let best: Task | null = null;
+  let bestDays: number | null = null;
+  for (const s of subtasks) {
+    if (s.completed) continue;
+    const d = daysUntilDue(s, now);
+    if (d === null) continue;
+    if (bestDays === null || d < bestDays) {
+      best = s;
+      bestDays = d;
+    }
+  }
+  return best;
+}
+
 // Soonest deadline among incomplete subtasks, in whole-day delta from today.
 // null when no incomplete subtask has a deadline.
 export function soonestSubtaskDays(
   subtasks: Task[],
   now: number = Date.now(),
 ): number | null {
-  let min: number | null = null;
-  for (const s of subtasks) {
-    if (s.completed) continue;
-    const d = daysUntilDue(s, now);
-    if (d === null) continue;
-    if (min === null || d < min) min = d;
-  }
-  return min;
+  const s = soonestSubtask(subtasks, now);
+  return s === null ? null : daysUntilDue(s, now);
+}
+
+// Completion progress for a master's subtasks; null when there are none.
+export function subtaskProgress(
+  subtasks: Task[],
+): { done: number; total: number } | null {
+  if (subtasks.length === 0) return null;
+  return {
+    done: subtasks.filter((s) => s.completed).length,
+    total: subtasks.length,
+  };
 }
 
 export type TaskPatch = {
