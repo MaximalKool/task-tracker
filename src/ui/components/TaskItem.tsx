@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type KeyboardEvent } from 'react';
 import {
   daysUntilDue,
   dueStatus,
-  soonestSubtaskDays,
+  soonestSubtask,
+  subtaskProgress,
   type TaskPatch,
 } from '../../core/tasks';
 import type { Task } from '../../core/types';
@@ -37,15 +38,22 @@ function formatDays(days: number, prefix: string): string {
 
 // Leaf/subtask: its own deadline. Master with subtasks: soonest subtask
 // deadline ("Subtask ..."), falling back to the master's own deadline when
-// no subtask has one. Nothing once complete.
-function dueLabel(task: Task, subtasks: Task[]): string | null {
+// no subtask has one. `ts` is the date the label refers to (for tooltip).
+// Nothing once complete.
+function dueInfo(
+  task: Task,
+  subtasks: Task[],
+): { text: string; ts: number | null } | null {
   if (task.completed) return null;
   if (subtasks.length > 0) {
-    const sub = soonestSubtaskDays(subtasks);
-    if (sub !== null) return formatDays(sub, 'Subtask');
+    const sub = soonestSubtask(subtasks);
+    if (sub) {
+      return { text: formatDays(daysUntilDue(sub)!, 'Subtask'), ts: sub.dueDate };
+    }
   }
   const days = daysUntilDue(task);
-  return days === null ? null : formatDays(days, '');
+  if (days === null) return null;
+  return { text: formatDays(days, ''), ts: task.dueDate };
 }
 
 export function TaskItem({
@@ -94,10 +102,29 @@ export function TaskItem({
     setAddingSub(false);
   }
 
+  function handleRemove() {
+    const msg =
+      subtasks.length > 0
+        ? `Delete "${task.title}" and its ${subtasks.length} subtask${
+            subtasks.length === 1 ? '' : 's'
+          }?`
+        : `Delete "${task.title}"?`;
+    if (window.confirm(msg)) onRemove(task.id);
+  }
+
+  const escapeCloses =
+    (close: () => void) => (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+
   if (editing) {
     return (
       <div className="task task--editing">
-        <form className="task__edit" onSubmit={handleSave}>
+        <form
+          className="task__edit"
+          onSubmit={handleSave}
+          onKeyDown={escapeCloses(() => setEditing(false))}
+        >
           <input
             className="task__edit-title"
             type="text"
@@ -140,7 +167,8 @@ export function TaskItem({
     );
   }
 
-  const label = dueLabel(task, subtasks);
+  const deadline = dueInfo(task, subtasks);
+  const progress = subtaskProgress(subtasks);
   const completedOn =
     task.completed && task.completedAt != null
       ? formatShortDate(task.completedAt)
@@ -164,15 +192,31 @@ export function TaskItem({
           />
           <span className="task__text">
             <span className="task__title">{task.title}</span>
-            {task.category && (
-              <span className="task__category">{task.category}</span>
-            )}
+            <span className="task__meta">
+              {task.category && (
+                <span className="task__category">{task.category}</span>
+              )}
+              {progress && (
+                <span className="task__progress">
+                  {progress.done}/{progress.total} done
+                </span>
+              )}
+            </span>
           </span>
         </label>
         {completedOn && (
           <span className="task__completed">Completed {completedOn}</span>
         )}
-        {label && <span className="task__due">{label}</span>}
+        {deadline && (
+          <span
+            className="task__due"
+            title={
+              deadline.ts != null ? formatShortDate(deadline.ts) : undefined
+            }
+          >
+            {deadline.text}
+          </span>
+        )}
         <div className="task__actions">
           {!isSubtask && (
             <button
@@ -193,14 +237,18 @@ export function TaskItem({
         </div>
         <button
           className="task__remove"
-          onClick={() => onRemove(task.id)}
+          onClick={handleRemove}
           aria-label={`Delete "${task.title}"`}
         >
           ×
         </button>
       </div>
       {addingSub && (
-        <form className="subtask-form" onSubmit={handleAddSub}>
+        <form
+          className="subtask-form"
+          onSubmit={handleAddSub}
+          onKeyDown={escapeCloses(() => setAddingSub(false))}
+        >
           <input
             className="subtask-form__title"
             type="text"

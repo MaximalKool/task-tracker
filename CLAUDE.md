@@ -108,7 +108,8 @@ drag-to-reorder, search, export/import, dark mode.
 outline states, deadline countdown, past-due filter, urgency sorting,
 completed counter + per-task completed date, inline editing, and one level
 of nested subtasks — a parent auto-completes when all its subtasks are done
-and subtasks inherit the parent's category.)
+and subtasks inherit the parent's category; delete confirmation, subtask
+progress (N/M done), absolute due-date tooltip, and Esc to cancel forms.)
 
 The data model and layering already accommodate these — they are deferred for scope,
 not blocked by architecture.

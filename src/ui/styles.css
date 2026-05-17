@@ -187,13 +187,24 @@ body {
   color: var(--muted);
 }
 
+.task__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .task__category {
-  align-self: flex-start;
   font-size: 0.7rem;
   background: #eef2f7;
   color: #5b6472;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
+}
+
+.task__progress {
+  font-size: 0.7rem;
+  color: var(--muted);
 }
 
 .task__actions {
