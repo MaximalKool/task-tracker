@@ -83,8 +83,11 @@ npm run typecheck  # type-check only
 ## Deployment
 
 - `vite.config.ts` sets `base: '/task-tracker/'` so Pages asset paths resolve.
-- `.github/workflows/deploy.yml` builds and deploys on push to the working branch and
-  `main`, using `pages: write` + `id-token: write`.
+- `.github/workflows/deploy.yml`: the `build` job runs on push to the working branch and
+  `main` (validation); the `deploy` job runs **only on `main`** because the
+  auto-created `github-pages` environment rejects deploys from non-default branches.
+  Uses `pages: write` + `id-token: write`. **The site publishes when changes land on
+  `main` (i.e. when the PR is merged).**
 - **One-time manual step (repo owner):** GitHub → Settings → Pages → Build and
   deployment → Source = **GitHub Actions**. First run may fail until this is set.
 - Live-edit alternative: `https://codesandbox.io/s/github/maximalkool/task-tracker`.
