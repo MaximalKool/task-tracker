@@ -13,11 +13,16 @@ export function migrate(raw: unknown): PersistedState {
   const state = raw as Partial<PersistedState>;
   const version = typeof state.schemaVersion === 'number' ? state.schemaVersion : 0;
 
+  const tasks = Array.isArray(state.tasks) ? state.tasks : [];
+
   switch (version) {
     case CURRENT_SCHEMA_VERSION:
+      return { schemaVersion: CURRENT_SCHEMA_VERSION, tasks };
+    case 1:
+      // v1 → v2: introduce the optional `dueDate` field.
       return {
         schemaVersion: CURRENT_SCHEMA_VERSION,
-        tasks: Array.isArray(state.tasks) ? state.tasks : [],
+        tasks: tasks.map((t) => ({ ...t, dueDate: t.dueDate ?? null })),
       };
     // case 0: ... (no released v0 format yet)
     default:

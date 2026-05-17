@@ -49,6 +49,14 @@ body {
   flex: 0 0 9rem;
 }
 
+.task-form__due {
+  flex: 0 0 9rem;
+}
+
+.task-form {
+  flex-wrap: wrap;
+}
+
 .task-form input {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
@@ -125,9 +133,21 @@ body {
   align-items: center;
   gap: 0.6rem;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 10px;
   padding: 0.7rem 0.85rem;
+}
+
+.task--overdue {
+  border-color: #e5484d;
+}
+
+.task--due {
+  border-color: #e0a800;
+}
+
+.task--done {
+  border-color: rgba(46, 160, 67, 0.35);
 }
 
 .task__main {
@@ -153,6 +173,20 @@ body {
   color: #5b6472;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
+}
+
+.task__due {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.task--overdue .task__due {
+  color: #e5484d;
+}
+
+.task--done .task__due {
+  color: var(--muted);
 }
 
 .task__remove {

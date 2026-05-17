@@ -8,14 +8,24 @@ export function App({ repo }: { repo: TaskRepository }) {
   const t = useTasks(repo);
 
   const remaining = t.tasks.filter((task) => !task.completed).length;
+  const completed = t.tasks.length - remaining;
 
   return (
     <main className="app">
       <header className="app__header">
         <h1>Task Tracker</h1>
-        <p className="app__subtitle">
-          {t.loaded ? `${remaining} task${remaining === 1 ? '' : 's'} left` : 'Loading…'}
-        </p>
+        {t.loaded ? (
+          <>
+            <p className="app__subtitle">
+              {remaining} task{remaining === 1 ? '' : 's'} left
+            </p>
+            <p className="app__subtitle">
+              {completed} task{completed === 1 ? '' : 's'} completed
+            </p>
+          </>
+        ) : (
+          <p className="app__subtitle">Loading…</p>
+        )}
       </header>
 
       <TaskForm onAdd={t.add} categories={t.categories} />

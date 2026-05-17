@@ -1,3 +1,4 @@
+import { dueStatus } from '../../core/tasks';
 import type { Task } from '../../core/types';
 
 type Props = {
@@ -6,9 +7,17 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
+function statusClass(task: Task): string {
+  if (task.completed) return ' task--done';
+  const due = dueStatus(task);
+  if (due === 'overdue') return ' task--overdue';
+  if (due === 'due') return ' task--due';
+  return '';
+}
+
 export function TaskItem({ task, onToggle, onRemove }: Props) {
   return (
-    <li className={`task${task.completed ? ' task--done' : ''}`}>
+    <li className={`task${statusClass(task)}`}>
       <label className="task__main">
         <input
           type="checkbox"
@@ -18,6 +27,11 @@ export function TaskItem({ task, onToggle, onRemove }: Props) {
         />
         <span className="task__title">{task.title}</span>
       </label>
+      {task.dueDate != null && (
+        <span className="task__due">
+          {new Date(task.dueDate).toLocaleDateString()}
+        </span>
+      )}
       {task.category && <span className="task__category">{task.category}</span>}
       <button
         className="task__remove"
