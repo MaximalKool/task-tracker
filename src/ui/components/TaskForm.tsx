@@ -1,16 +1,10 @@
 import { useState, type FormEvent } from 'react';
+import { parseDateInput } from '../dateInput';
 
 type Props = {
   onAdd: (title: string, category: string, dueDate: number | null) => void;
   categories: string[];
 };
-
-// "YYYY-MM-DD" from <input type="date"> → local-midnight timestamp.
-function parseDueDate(value: string): number | null {
-  if (!value) return null;
-  const [y, m, d] = value.split('-').map(Number);
-  return new Date(y, m - 1, d).getTime();
-}
 
 export function TaskForm({ onAdd, categories }: Props) {
   const [title, setTitle] = useState('');
@@ -20,7 +14,7 @@ export function TaskForm({ onAdd, categories }: Props) {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd(title, category, parseDueDate(due));
+    onAdd(title, category, parseDateInput(due));
     setTitle('');
     setCategory('');
     setDue('');

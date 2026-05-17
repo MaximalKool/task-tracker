@@ -6,8 +6,9 @@ import {
   filterTasks,
   listCategories,
   removeTask,
-  setCategory,
   toggleComplete,
+  updateTask,
+  type TaskPatch,
 } from '../../core/tasks';
 import type { StatusFilter, Task } from '../../core/types';
 import type { TaskRepository } from '../../data/TaskRepository';
@@ -55,8 +56,8 @@ export function useTasks(repo: TaskRepository) {
     setTasks((prev) => toggleComplete(prev, id));
   }, []);
 
-  const recategorize = useCallback((id: string, cat: string) => {
-    setTasks((prev) => setCategory(prev, id, cat));
+  const edit = useCallback((id: string, patch: TaskPatch) => {
+    setTasks((prev) => updateTask(prev, id, patch));
   }, []);
 
   const clearDone = useCallback(() => {
@@ -81,7 +82,7 @@ export function useTasks(repo: TaskRepository) {
     add,
     remove,
     toggle,
-    recategorize,
+    edit,
     clearDone,
   };
 }
