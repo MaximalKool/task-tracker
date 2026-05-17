@@ -40,11 +40,12 @@ export function App({ repo }: { repo: TaskRepository }) {
       />
 
       <TaskList
-        tasks={t.visibleTasks}
+        nodes={t.visibleTree}
         loaded={t.loaded}
         onToggle={t.toggle}
         onRemove={t.remove}
         onEdit={t.edit}
+        onAddSub={t.addSub}
       />
     </main>
   );

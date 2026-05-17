@@ -130,6 +130,18 @@ body {
   gap: 0.4rem;
 }
 
+.task-node {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.task-list--nested {
+  margin-left: 1.75rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border);
+}
+
 .task {
   display: flex;
   align-items: center;
@@ -189,6 +201,33 @@ body {
 
 .task--done .task__due {
   color: var(--muted);
+}
+
+.task__completed {
+  font-size: 0.95rem;
+  color: #2ea043;
+  white-space: nowrap;
+}
+
+.subtask-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: 1.75rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border);
+}
+
+.subtask-form__title {
+  flex: 1 1 12rem;
+}
+
+.subtask-form input {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--surface);
 }
 
 .task__btn {

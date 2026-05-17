@@ -15,15 +15,21 @@ export function migrate(raw: unknown): PersistedState {
 
   const tasks = Array.isArray(state.tasks) ? state.tasks : [];
 
+  // v1 introduced `dueDate`, v3 introduced `completedAt`. Both are optional
+  // and default to null, so older versions normalize forward losslessly.
+  const normalize = () =>
+    tasks.map((t) => ({
+      ...t,
+      dueDate: t.dueDate ?? null,
+      completedAt: t.completedAt ?? null,
+    }));
+
   switch (version) {
     case CURRENT_SCHEMA_VERSION:
       return { schemaVersion: CURRENT_SCHEMA_VERSION, tasks };
     case 1:
-      // v1 → v2: introduce the optional `dueDate` field.
-      return {
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-        tasks: tasks.map((t) => ({ ...t, dueDate: t.dueDate ?? null })),
-      };
+    case 2:
+      return { schemaVersion: CURRENT_SCHEMA_VERSION, tasks: normalize() };
     // case 0: ... (no released v0 format yet)
     default:
       return EMPTY;

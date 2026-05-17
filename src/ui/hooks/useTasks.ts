@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   addTask,
+  buildTree,
   clearCompleted,
   createTask,
   filterTasks,
   listCategories,
+  reconcileParents,
   removeTask,
   sortTasks,
   toggleComplete,
   updateTask,
   type TaskPatch,
 } from '../../core/tasks';
-import type { StatusFilter, Task } from '../../core/types';
+import type { StatusFilter, Task, TaskNode } from '../../core/types';
 import type { TaskRepository } from '../../data/TaskRepository';
 
 // The single bridge between the UI and core/data. Components never touch
@@ -49,6 +51,19 @@ export function useTasks(repo: TaskRepository) {
     [],
   );
 
+  const addSub = useCallback(
+    (parentId: string, title: string, dueDate: number | null) => {
+      if (!title.trim()) return;
+      setTasks((prev) => {
+        const parent = prev.find((t) => t.id === parentId);
+        if (!parent || parent.parentId !== null) return prev; // 1 level only
+        const sub = createTask(title, parent.category, dueDate, parentId);
+        return reconcileParents(addTask(prev, sub));
+      });
+    },
+    [],
+  );
+
   const remove = useCallback((id: string) => {
     setTasks((prev) => removeTask(prev, id));
   }, []);
@@ -66,21 +81,30 @@ export function useTasks(repo: TaskRepository) {
   }, []);
 
   const categories = useMemo(() => listCategories(tasks), [tasks]);
-  const visibleTasks = useMemo(
-    () => sortTasks(filterTasks(tasks, status, category)),
-    [tasks, status, category],
-  );
+
+  // Top-level tasks are filtered + urgency-sorted; their subtasks ride along
+  // (subtasks aren't filtered independently) and are urgency-sorted too.
+  const visibleTree = useMemo<TaskNode[]>(() => {
+    const top = buildTree(tasks);
+    const filtered = filterTasks(top, status, category) as TaskNode[];
+    const sorted = sortTasks(filtered) as TaskNode[];
+    return sorted.map((n) => ({
+      ...n,
+      children: sortTasks(n.children) as TaskNode[],
+    }));
+  }, [tasks, status, category]);
 
   return {
     loaded,
     tasks,
-    visibleTasks,
+    visibleTree,
     categories,
     status,
     category,
     setStatus,
     setActiveCategory,
     add,
+    addSub,
     remove,
     toggle,
     edit,
