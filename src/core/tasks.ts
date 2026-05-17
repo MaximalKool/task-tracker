@@ -30,6 +30,36 @@ export function dueStatus(task: Task, now: number = Date.now()): DueStatus {
   return task.dueDate < startOfToday.getTime() ? 'overdue' : 'due';
 }
 
+// Whole-day delta between today and the due day. Positive = days remaining,
+// 0 = due today, negative = days overdue. null when there is no deadline.
+export function daysUntilDue(task: Task, now: number = Date.now()): number | null {
+  if (task.dueDate == null) return null;
+  const startToday = new Date(now);
+  startToday.setHours(0, 0, 0, 0);
+  const dueDay = new Date(task.dueDate);
+  dueDay.setHours(0, 0, 0, 0);
+  return Math.round((dueDay.getTime() - startToday.getTime()) / 86_400_000);
+}
+
+export type TaskPatch = {
+  title?: string;
+  category?: string;
+  dueDate?: number | null;
+};
+
+export function updateTask(tasks: Task[], id: string, patch: TaskPatch): Task[] {
+  return tasks.map((t) => {
+    if (t.id !== id) return t;
+    return {
+      ...t,
+      ...(patch.title !== undefined ? { title: patch.title.trim() } : {}),
+      ...(patch.category !== undefined ? { category: patch.category.trim() } : {}),
+      ...(patch.dueDate !== undefined ? { dueDate: patch.dueDate } : {}),
+      updatedAt: Date.now(),
+    };
+  });
+}
+
 export function addTask(tasks: Task[], task: Task): Task[] {
   return [...tasks, task];
 }
@@ -53,12 +83,6 @@ export function removeTask(tasks: Task[], id: string): Task[] {
 export function toggleComplete(tasks: Task[], id: string): Task[] {
   return tasks.map((t) =>
     t.id === id ? { ...t, completed: !t.completed, updatedAt: Date.now() } : t,
-  );
-}
-
-export function setCategory(tasks: Task[], id: string, category: string): Task[] {
-  return tasks.map((t) =>
-    t.id === id ? { ...t, category: category.trim(), updatedAt: Date.now() } : t,
   );
 }
 

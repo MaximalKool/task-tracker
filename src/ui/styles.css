@@ -66,12 +66,14 @@ body {
 }
 
 .task-form__add {
-  padding: 0 1.1rem;
+  flex: 1 0 100%;
+  padding: 0.65rem 1.1rem;
   border: none;
   border-radius: 8px;
   background: var(--accent);
   color: #fff;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
 }
 
@@ -168,7 +170,7 @@ body {
 }
 
 .task__category {
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   background: #eef2f7;
   color: #5b6472;
   padding: 0.15rem 0.5rem;
@@ -176,7 +178,7 @@ body {
 }
 
 .task__due {
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -187,6 +189,60 @@ body {
 
 .task--done .task__due {
   color: var(--muted);
+}
+
+.task__btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.task__btn:hover {
+  color: var(--text);
+}
+
+.task__btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.task__btn--primary:hover {
+  color: #fff;
+}
+
+.task__edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.task__edit input {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--surface);
+}
+
+.task__edit-title {
+  flex: 1 1 12rem;
+}
+
+.task__edit-category,
+.task__edit-due {
+  flex: 0 0 9rem;
+}
+
+.task__edit-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex: 1 0 100%;
 }
 
 .task__remove {

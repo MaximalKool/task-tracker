@@ -44,6 +44,7 @@ export function App({ repo }: { repo: TaskRepository }) {
         loaded={t.loaded}
         onToggle={t.toggle}
         onRemove={t.remove}
+        onEdit={t.edit}
       />
     </main>
   );

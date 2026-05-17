@@ -1,3 +1,4 @@
+import type { TaskPatch } from '../../core/tasks';
 import type { Task } from '../../core/types';
 import { TaskItem } from './TaskItem';
 
@@ -6,9 +7,10 @@ type Props = {
   loaded: boolean;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  onEdit: (id: string, patch: TaskPatch) => void;
 };
 
-export function TaskList({ tasks, loaded, onToggle, onRemove }: Props) {
+export function TaskList({ tasks, loaded, onToggle, onRemove, onEdit }: Props) {
   if (!loaded) return null;
 
   if (tasks.length === 0) {
@@ -18,7 +20,13 @@ export function TaskList({ tasks, loaded, onToggle, onRemove }: Props) {
   return (
     <ul className="task-list">
       {tasks.map((task) => (
-        <TaskItem key={task.id} task={task} onToggle={onToggle} onRemove={onRemove} />
+        <TaskItem
+          key={task.id}
+          task={task}
+          onToggle={onToggle}
+          onRemove={onRemove}
+          onEdit={onEdit}
+        />
       ))}
     </ul>
   );
