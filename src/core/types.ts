@@ -5,11 +5,14 @@ export type Task = {
   completed: boolean;
   parentId: string | null; // null = top-level; enables nested tasks with no migration
   order: number; // stable sort slot; enables future drag-reorder
+  dueDate: number | null; // local-midnight timestamp; null = no deadline
   createdAt: number;
   updatedAt: number; // enables future sync / conflict resolution
 };
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
+
+export type DueStatus = 'overdue' | 'due' | 'none';
 
 export type PersistedState = {
   schemaVersion: number;

@@ -1,20 +1,29 @@
 import { useState, type FormEvent } from 'react';
 
 type Props = {
-  onAdd: (title: string, category: string) => void;
+  onAdd: (title: string, category: string, dueDate: number | null) => void;
   categories: string[];
 };
+
+// "YYYY-MM-DD" from <input type="date"> → local-midnight timestamp.
+function parseDueDate(value: string): number | null {
+  if (!value) return null;
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d).getTime();
+}
 
 export function TaskForm({ onAdd, categories }: Props) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
+  const [due, setDue] = useState('');
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd(title, category);
+    onAdd(title, category, parseDueDate(due));
     setTitle('');
     setCategory('');
+    setDue('');
   }
 
   return (
@@ -42,6 +51,13 @@ export function TaskForm({ onAdd, categories }: Props) {
           <option key={c} value={c} />
         ))}
       </datalist>
+      <input
+        className="task-form__due"
+        type="date"
+        value={due}
+        onChange={(e) => setDue(e.target.value)}
+        aria-label="Due date (optional)"
+      />
       <button type="submit" className="task-form__add">
         Add
       </button>

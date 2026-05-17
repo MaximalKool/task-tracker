@@ -1,8 +1,9 @@
-import type { StatusFilter, Task, TaskNode } from './types';
+import type { DueStatus, StatusFilter, Task, TaskNode } from './types';
 
 export function createTask(
   title: string,
   category: string,
+  dueDate: number | null = null,
   parentId: string | null = null,
   order = Date.now(),
 ): Task {
@@ -14,9 +15,19 @@ export function createTask(
     completed: false,
     parentId,
     order,
+    dueDate,
     createdAt: now,
     updatedAt: now,
   };
+}
+
+// Pure deadline classification. Overdue = the due day has fully passed;
+// on the due day itself the task is still just "due".
+export function dueStatus(task: Task, now: number = Date.now()): DueStatus {
+  if (task.dueDate == null || task.completed) return 'none';
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  return task.dueDate < startOfToday.getTime() ? 'overdue' : 'due';
 }
 
 export function addTask(tasks: Task[], task: Task): Task[] {

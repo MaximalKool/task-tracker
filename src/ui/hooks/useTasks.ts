@@ -39,10 +39,13 @@ export function useTasks(repo: TaskRepository) {
     void repo.save(tasks);
   }, [tasks, loaded, repo]);
 
-  const add = useCallback((title: string, cat: string) => {
-    if (!title.trim()) return;
-    setTasks((prev) => addTask(prev, createTask(title, cat)));
-  }, []);
+  const add = useCallback(
+    (title: string, cat: string, dueDate: number | null) => {
+      if (!title.trim()) return;
+      setTasks((prev) => addTask(prev, createTask(title, cat, dueDate)));
+    },
+    [],
+  );
 
   const remove = useCallback((id: string) => {
     setTasks((prev) => removeTask(prev, id));
