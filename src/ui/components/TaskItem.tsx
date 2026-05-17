@@ -1,12 +1,17 @@
 import { useState, type FormEvent } from 'react';
-import { daysUntilDue, dueStatus, type TaskPatch } from '../../core/tasks';
+import {
+  daysUntilDue,
+  dueStatus,
+  soonestSubtaskDays,
+  type TaskPatch,
+} from '../../core/tasks';
 import type { Task } from '../../core/types';
-import { parseDateInput, toDateInputValue } from '../dateInput';
+import { formatShortDate, parseDateInput, toDateInputValue } from '../dateInput';
 
 type Props = {
   task: Task;
   isSubtask: boolean;
-  hasChildren: boolean;
+  subtasks: Task[];
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onEdit: (id: string, patch: TaskPatch) => void;
@@ -21,24 +26,38 @@ function statusClass(task: Task): string {
   return '';
 }
 
-function dueLabel(task: Task): string | null {
-  const days = daysUntilDue(task);
-  if (days === null) return null;
-  if (days === 0) return 'Due today';
+function formatDays(days: number, prefix: string): string {
+  const lead = prefix ? `${prefix} ` : '';
+  if (days === 0) return `${lead}due today`;
   const n = Math.abs(days);
   const unit = n === 1 ? 'day' : 'days';
-  return days > 0 ? `${n} ${unit} till deadline` : `${n} ${unit} past due`;
+  if (days > 0) return `${lead}due in ${n} ${unit}`;
+  return `${lead}${n} ${unit} past due`;
+}
+
+// Leaf/subtask: its own deadline. Master with subtasks: soonest subtask
+// deadline ("Subtask ..."), falling back to the master's own deadline when
+// no subtask has one. Nothing once complete.
+function dueLabel(task: Task, subtasks: Task[]): string | null {
+  if (task.completed) return null;
+  if (subtasks.length > 0) {
+    const sub = soonestSubtaskDays(subtasks);
+    if (sub !== null) return formatDays(sub, 'Subtask');
+  }
+  const days = daysUntilDue(task);
+  return days === null ? null : formatDays(days, '');
 }
 
 export function TaskItem({
   task,
   isSubtask,
-  hasChildren,
+  subtasks,
   onToggle,
   onRemove,
   onEdit,
   onAddSub,
 }: Props) {
+  const hasChildren = subtasks.length > 0;
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [category, setCategory] = useState(task.category);
@@ -121,12 +140,10 @@ export function TaskItem({
     );
   }
 
-  // No deadline indicator once complete, or on a master with subtasks
-  // (the subtasks carry their own deadlines and are always visible).
-  const label = task.completed || hasChildren ? null : dueLabel(task);
+  const label = dueLabel(task, subtasks);
   const completedOn =
     task.completed && task.completedAt != null
-      ? new Date(task.completedAt).toLocaleDateString()
+      ? formatShortDate(task.completedAt)
       : null;
 
   return (

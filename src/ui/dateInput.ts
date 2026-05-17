@@ -13,3 +13,12 @@ export function parseDateInput(value: string): number | null {
   const [y, m, d] = value.split('-').map(Number);
   return new Date(y, m - 1, d).getTime();
 }
+
+// Compact MM/DD/YY (locale-independent) to save horizontal space.
+export function formatShortDate(ts: number): string {
+  const d = new Date(ts);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${String(
+    d.getFullYear(),
+  ).slice(-2)}`;
+}
